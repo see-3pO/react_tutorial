@@ -252,3 +252,139 @@ function App() {
 export default App;
 
 ```
+
+
+### Forms
+
+Getting values of input field using useRef() hook
+
+```tsx
+import { FormEvent, useRef } from "react";
+
+const Form = () => {
+    const nameRef = useRef<HTMLInputElement>(null);
+    const ageRef  = useRef<HTMLInputElement>(null);
+    const person = { name: '', age: 0 }
+
+    const handleSubmit = (event: FormEvent) => {
+        event.preventDefault();
+        if (nameRef.current !== null)
+            person.name = nameRef.current.value;
+        if (ageRef.current !==null)
+            person.age = parseInt(ageRef.current.value);
+        console.log(person);
+    }
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className="mb-3">
+        <label htmlFor="name" className="form-label">
+          Name
+        </label>
+        <input id="name" ref={nameRef} type="text" className="form-control" />
+      </div>
+      <div className="mb-3">
+        <label htmlFor="age" className="form-label">Age</label>
+        <input id="age" ref={ageRef} type="number" className="form-control" />
+      </div>
+      <button className="btn btn-primary" type="submit">Submit</button>
+    </form>
+  );
+};
+
+export default Form;
+```
+
+Using state hook to get input values
+
+```tsx
+import { FormEvent, useState } from "react";
+
+const Form = () => {
+  const [person, setPerson] = useState({
+    name: "",
+    age: "",
+  });
+  const handleSubmit = (event: FormEvent) => {
+    event.preventDefault();
+    console.log(person);
+  };
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className="mb-3">
+        <label htmlFor="name" className="form-label">
+          Name
+        </label>
+        <input
+          id="name"
+          // makes input value be controlled entirely by the state and not managed by the DOM
+          value={person.name}
+          onChange={(event) =>
+            setPerson({ ...person, name: event.target.value })
+          }
+          type="text"
+          className="form-control"
+        />
+      </div>
+      <div className="mb-3">
+        <label htmlFor="age" className="form-label">
+          Age
+        </label>
+        <input 
+          id="age"
+          value={person.age}
+          onChange={(event) => setPerson({...person, age: parseInt(event.target.value)})} 
+          type="number" className="form-control" />
+      </div>
+      <button className="btn btn-primary" type="submit">
+        Submit
+      </button>
+    </form>
+  );
+};
+
+export default Form;
+
+```
+
+Using the react hook form library
+
+```tsx
+import { FieldValues, useForm } from "react-hook-form";
+
+const Form = () => {
+  const { register, handleSubmit } = useForm();
+  const onSubmit = (data: FieldValues) => console.log(data);
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="mb-3">
+        <label htmlFor="name" className="form-label">
+          Name
+        </label>
+        <input
+          {...register("name")}
+          id="name"
+          type="text"
+          className="form-control"
+        />
+      </div>
+      <div className="mb-3">
+        <label htmlFor="age" className="form-label">
+          Age
+        </label>
+        <input
+          {...register("age")}
+          id="age"
+          type="number"
+          className="form-control"
+        />
+      </div>
+      <button className="btn btn-primary" type="submit">
+        Submit
+      </button>
+    </form>
+  );
+};
+
+export default Form;
+
+```
