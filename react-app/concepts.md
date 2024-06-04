@@ -388,3 +388,86 @@ const Form = () => {
 export default Form;
 
 ```
+Handling validation using zod lib
+```tsx
+import { FieldValues, useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod/dist/zod.js";
+
+// using z object method to configure validation rules
+const schema = z.object({
+  name: z.string().min(3, { message: "Name must be at least 3 characters" }),
+  age: z
+    .number({ invalid_type_error: "Age field is required" })
+    .min(18, { message: "Age must be at least 18" }),
+});
+
+// returning typecript type(similar to an interface)
+type FormData = z.infer<typeof schema>;
+
+const Form = () => {
+  // nested destructuring of the formState property to get the errors using formState: {errors}
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>({ resolver: zodResolver(schema) });
+
+  const onSubmit = (data: FieldValues) => console.log(data);
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="mb-3">
+        <label htmlFor="name" className="form-label">
+          Name
+        </label>
+        <input
+          {...register("name")}
+          id="name"
+          type="text"
+          className="form-control"
+        />
+        {errors.name && <p className="text-danger">{errors.name.message}</p>}
+      </div>
+      <div className="mb-3">
+        <label htmlFor="age" className="form-label">
+          Age
+        </label>
+        <input
+          {...register("age", { valueAsNumber: true })}
+          id="age"
+          type="number"
+          className="form-control"
+        />
+        {errors.age && <p className="text-danger">{errors.age.message}</p>}
+      </div>
+      <button className="btn btn-primary" type="submit">
+        Submit
+      </button>
+    </form>
+  );
+};
+
+export default Form;
+
+```
+
+Output:
+
+![alt text](image.png)
+
+
+### Error map function
+```tsx
+const schema = z.object({
+  description: z.string().min(3, { message: 'Description should be at least 3 characters' }).max(50, { message: 'Description has a 50 character maximum limit' }),
+  amount: z.number({ invalid_type_error: 'Amount is required' }).min(0.01).max(100_000),
+  category: z.enum(categories, {
+    errorMap: () => ({ message: 'Category is required' })
+  }),
+});
+
+```
+`errorMap` Option:
+
+    The errorMap option allows you to customize the error message if the validation fails.
+    In this case, if the value of category is not one of the specified strings in categories, the error message will be 'Category is required'.
